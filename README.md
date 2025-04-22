@@ -31,6 +31,6 @@ O objetivo do projeto é simular condições reais de temperatura e umidade, pro
 5. Interaja com os botões para alternar modos ou silenciar alarmes quando o buzzer for ativado.
 
 ## Link do Projeto  
-- **Demonstração no YouTube**: XXXXXXXX
+- **Demonstração no YouTube**: [Vídeo](https://youtu.be/r31pUqLZNLk) / https://youtu.be/r31pUqLZNLk
 ## Autor  
 Desenvolvido por Levi Silva Freitas.
