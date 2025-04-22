@@ -2,6 +2,10 @@
 // Autor: Levi Silva Freitas
 // Data: 19/04/2025
 
+// Descrição: Código para controle de um vaso inteligente com display OLED, LEDs RGB e buzzer
+// O código lê os valores de temperatura e umidade de sensores analógicos, exibe os dados em um display OLED e controla LEDs RGB e um buzzer para feedback visual e sonoro.
+
+// Bibliotecas necessárias para o funcionamento do código
 #include <stdio.h>
 #include <stdlib.h>
 #include "pico/stdlib.h"
@@ -15,7 +19,7 @@
 #include "inc/ssd1306.h"
 
 // Arquivo .pio
-#include "final.pio.h"
+#include "./final.pio.h" // Garantir que o programa final esteja declarado
 
 // I2C - Display OLED
 #define I2C_ENDERECO 0x3C
@@ -40,8 +44,8 @@
 #define BUZZER_PWM_CHANNEL pwm_gpio_to_channel(BUZZER)
 
 // Entradas analógicas simuladas pelo joystick
-#define SENSOR_TEMPERATURA 26  // eixo X
-#define SENSOR_UMIDADE 27      // eixo Y
+#define SENSOR_TEMPERATURA 27  // eixo X
+#define SENSOR_UMIDADE 26      // eixo Y
 
 // Botões para alternar o display
 #define BOTAO_TEMP 5
@@ -91,10 +95,10 @@ int main() {
     add_repeating_timer_ms(5000, alarme_periodico_callback, NULL, &timer);
 
     while (true) {
-        adc_select_input(0);
+        adc_select_input(1);
         uint16_t temperatura_adc = adc_read();
 
-        adc_select_input(1);
+        adc_select_input(0);
         uint16_t umidade_adc = adc_read();
 
         atualizar_feedback_visual(temperatura_adc, umidade_adc);
@@ -155,7 +159,7 @@ bool inicializar_sistema() {
     configurar_pwm(BUZZER);
 
     // Inicia PIO para controlar matriz de LEDs
-    extern const pio_program_t final_program; // Ensure final_program is declared
+    extern const pio_program_t final_program;
     uint offset = pio_add_program(pio, &final_program);
     sm = pio_claim_unused_sm(pio, true);
     final_program_init(pio, sm, offset, LED_MATRIX);
@@ -299,11 +303,17 @@ uint32_t matrix_rgb(double b, double r, double g) {
 
 bool alarme_periodico_callback(repeating_timer_t *t) {
     adc_select_input(0);
-    float temperatura = (adc_read() / 4095.0f) * 70.0f; // Simulação de temperatura em Celsius de 0 a 70 graus
+    float umidade = (adc_read() / 4095.0f) * 100.0f; // Simulação de temperatura em Celsius de 0 a 70 graus
 
     adc_select_input(1);
-    float umidade = (adc_read() / 4095.0f) * 100.0f; // Simulação de umidade em porcentagem de 0 a 100%
+    float temperatura = (adc_read() / 4095.0f) * 70.0f; // Simulação de umidade em porcentagem de 0 a 100%
 
     printf("[Relatorio Periodico] Temperatura: %.2f C | Umidade: %.2f %%\n", temperatura, umidade);
+    if(umidade > 80.0 || umidade < 20.0)
+        printf("Dê atenção a sua planta!!\nUmidade fora do intervalo!\n");
+    else if(temperatura > 50.0 || temperatura < 10.0)
+        printf("Dê atenção a sua planta!!\nTemperatura fora do intervalo!\n");
+    else
+        printf("Sua planta está feliz!!\nTemperatura e umidade dentro do intervalo.\n");
     return true;
 }
